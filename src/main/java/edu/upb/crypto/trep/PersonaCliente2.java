@@ -17,16 +17,18 @@ public class PersonaCliente2 {
     }
 
     public static void enviarMensaje() {
-        try (Socket socket = new Socket("172.16.73.202", 1825);
+//        try (Socket socket = new Socket("172.16.73.202", 1825);
+            try (Socket socket = new Socket("172.16.61.14", 1825);
+
              DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
              BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
             System.out.println("Cliente conectado...");
 
             // Enviar un mensaje inicial al servidor
-            String mensaje1 = "0001" + System.lineSeparator();
-            dataOutputStream.write(mensaje1.getBytes("UTF-8"));
-            dataOutputStream.flush();
+//            String mensaje1 = "h" + System.lineSeparator();
+//            dataOutputStream.write(mensaje1.getBytes("UTF-8"));
+//            dataOutputStream.flush();
 
             // Leer respuesta del servidor en bucle
             String respuesta;

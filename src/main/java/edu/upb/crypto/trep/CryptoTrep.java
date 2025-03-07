@@ -27,9 +27,6 @@ public class CryptoTrep {
         PlanificadorMensajesSalida ps = new PlanificadorMensajesSalida();
         ps.start();
 
-        Server server = new Server();
-        server.start();
-        server.addListener(ps);
 
         ApacheServer apacheServer = new ApacheServer();
         apacheServer.start();
@@ -38,6 +35,11 @@ public class CryptoTrep {
         pe.start();
 
 
+
+        Server server = new Server();
+        server.start();
+        server.addListener(ps);
+        server.addPlanificadorEntrada(pe);
 
         System.out.println(":::::::::::::::: Crypto Trep Iniciando ::::::::::::::::::");
 

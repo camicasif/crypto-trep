@@ -19,6 +19,7 @@ public class Server extends Thread {
     private static final EventListenerList listenerList = new EventListenerList();
     private final ServerSocket serverSocket;
 
+    private SocketEvent planificadorEntrada;
     public Server() throws IOException {
         this.serverSocket = new ServerSocket(1825);
     }
@@ -32,6 +33,7 @@ public class Server extends Thread {
                 SocketClient sc =new SocketClient(socket);
                 sc.start();
 
+                sc.addListerner(planificadorEntrada);
                 notificarEvento(sc);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -43,6 +45,9 @@ public class Server extends Thread {
         this.listenerList.add(SocketEvent.class, listener);
     }
 
+    public void addPlanificadorEntrada(SocketEvent listener){
+
+    }
     public void notificarEvento(SocketClient socketClient) {
         for (SocketEvent listener : listenerList.getListeners(SocketEvent.class)) {
             listener.onNewNodo(socketClient);
