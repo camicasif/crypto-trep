@@ -7,9 +7,9 @@ package edu.upb.crypto.trep;
 
 import edu.upb.crypto.trep.config.MyProperties;
 import edu.upb.crypto.trep.httpserver.ApacheServer;
-import edu.upb.crypto.trep.mosincronizacion.PlanificadorMensajesEntrada;
-import edu.upb.crypto.trep.mosincronizacion.PlanificadorMensajesSalida;
-import edu.upb.crypto.trep.mosincronizacion.server.Server;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesEntrada;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
+import edu.upb.crypto.trep.modsincronizacion.server.Server;
 
 import java.io.IOException;
 

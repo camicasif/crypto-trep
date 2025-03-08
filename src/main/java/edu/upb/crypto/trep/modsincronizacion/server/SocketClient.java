@@ -2,12 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package edu.upb.crypto.trep.mosincronizacion.server;
+package edu.upb.crypto.trep.modsincronizacion.server;
 
 
 import edu.upb.crypto.trep.bl.Comando;
+import edu.upb.crypto.trep.bl.SincronizacionCandidatos;
 import edu.upb.crypto.trep.bl.SincronizacionNodos;
-import edu.upb.crypto.trep.mosincronizacion.server.event.SocketEvent;
+import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 import lombok.Getter;
 
 import javax.swing.event.EventListenerList;
@@ -44,15 +45,21 @@ public class SocketClient extends Thread {
             String message;
             while ((message = br.readLine()) != null) {
                 String[] tokens = message.split(Pattern.quote("|"));
+                System.out.println(message);
                 Comando comando = null;
-                switch (tokens[0]){
+                switch (tokens[0]) {
                     case "0001":
                         comando = new SincronizacionNodos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case "0002":
+                        comando = new SincronizacionCandidatos(this.ip);
                         comando.parsear(message);
                         break;
 
                 }
 
+                notificar(comando);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -68,15 +75,15 @@ public class SocketClient extends Thread {
         }
     }
 
-    public void addListerner(SocketEvent e){
+    public void addListerner(SocketEvent e) {
         listenerList.add(SocketEvent.class, e);
     }
 
-    public void notificar(Comando comando){
+    public void notificar(Comando comando) {
         for (SocketEvent e : listenerList.getListeners(SocketEvent.class)) {
             e.onMessage(comando);
         }
     }
 
-    
+
 }

@@ -1,13 +1,16 @@
-package edu.upb.crypto.trep.mosincronizacion;
+package edu.upb.crypto.trep.modsincronizacion;
 
+import edu.upb.crypto.trep.DataBase.models.Candidato;
 import edu.upb.crypto.trep.bl.Comando;
+import edu.upb.crypto.trep.bl.SincronizacionCandidatos;
 import edu.upb.crypto.trep.bl.SincronizacionNodos;
 import edu.upb.crypto.trep.config.MyProperties;
-import edu.upb.crypto.trep.mosincronizacion.server.SocketClient;
-import edu.upb.crypto.trep.mosincronizacion.server.event.SocketEvent;
+import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
+import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -63,15 +66,37 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
         synchronized (nodos) {
             nodos.put(client.getIp(), client);
         }
+        System.out.println("Nuevo Nodo " + client.getIp());
         if(MyProperties.IS_NODO_PRINCIPAL){
+            System.out.println("Es nodo pro " + client.getIp());
             // preparar el comando y enviar  a todo
-            Comando comando = new SincronizacionNodos(new ArrayList<>());
+            Comando comando = new SincronizacionNodos(new ArrayList<>(nodos.keySet()));
             try {
                 client.send(comando.getComando());
             }catch (Exception e){
                 e.printStackTrace();
             }
+            // enviar candidatos
+            List<Candidato> candidatoes = new ArrayList<>();
+            candidatoes.add(new Candidato("1", "Alejandra"));
+            candidatoes.add(new Candidato("2", "Casita"));
+            candidatoes.add(new Candidato("3", "Lucas"));
+            comando = new SincronizacionCandidatos(candidatoes);
+            try {
+                client.send(comando.getComando());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            // enviar votantes
+
+            // enviar bloques
         }
+    }
+
+
+    @Override
+    public void onCloseNodo(SocketClient client) {
+
     }
 
     @Override

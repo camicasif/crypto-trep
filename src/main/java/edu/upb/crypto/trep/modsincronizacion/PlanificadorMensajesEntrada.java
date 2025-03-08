@@ -1,8 +1,8 @@
-package edu.upb.crypto.trep.mosincronizacion;
+package edu.upb.crypto.trep.modsincronizacion;
 
 import edu.upb.crypto.trep.bl.Comando;
-import edu.upb.crypto.trep.mosincronizacion.server.SocketClient;
-import edu.upb.crypto.trep.mosincronizacion.server.event.SocketEvent;
+import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
+import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -27,10 +27,12 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
                 }
                 comando = messages.poll();
             }
+            System.out.println(comando.getComando());
             switch (comando.getCodigoComando()){
                 case "0001":
 
                     break;
+
             }
         }
     }
@@ -43,6 +45,11 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
     @Override
     public void onNewNodo(SocketClient client) {
         // no implementar
+    }
+
+    @Override
+    public void onCloseNodo(SocketClient client) {
+
     }
 
     @Override
