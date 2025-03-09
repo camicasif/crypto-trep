@@ -33,6 +33,10 @@ public class SincronizacionNodos extends Comando{
 
     @Override
     public String getComando() {
-        return "";
+
+        if (ips == null || ips.isEmpty()) {
+            return "0001|"+ System.lineSeparator();
+        }
+        return "0001|" + String.join(";", ips) + System.lineSeparator();
     }
 }
