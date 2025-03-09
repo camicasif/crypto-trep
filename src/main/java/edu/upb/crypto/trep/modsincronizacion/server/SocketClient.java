@@ -45,7 +45,6 @@ public class SocketClient extends Thread {
             String message;
             while ((message = br.readLine()) != null) {
                 String[] tokens = message.split(Pattern.quote("|"));
-                System.out.println(message);
                 Comando comando = null;
                 switch (tokens[0]) {
                     case "0001":
@@ -55,6 +54,29 @@ public class SocketClient extends Thread {
                     case "0002":
                         comando = new SincronizacionCandidatos(this.ip);
                         comando.parsear(message);
+                        break;
+                    case "0003":
+                        comando = new SincronizacionCandidatos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case "0004":
+                        comando = new SincronizacionCandidatos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case "0005":
+                        comando = new SincronizacionCandidatos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case "0006":
+                        comando = new SincronizacionCandidatos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case "0007":
+                        comando = new SincronizacionCandidatos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    default:
+                        System.out.println("Comando no identificado: "+ message);
                         break;
 
                 }

@@ -47,52 +47,57 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
         }
     }
 
-    private void sendMessage(Comando comando){
-        Iterator<SocketClient> iterator = nodos.values().iterator();
-        while (iterator.hasNext()) {
-            SocketClient nodo = iterator.next();
-            try {
-                nodo.send(comando.getComando());
-            }catch (Exception e){
-                e.printStackTrace();
+//    private void sendMessage(Comando comando){
+//        Iterator<SocketClient> iterator = nodos.values().iterator();
+//        while (iterator.hasNext()) {
+//            SocketClient nodo = iterator.next();
+//            try {
+//                nodo.send(comando.getComando());
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }
+//
+//    }
+
+    private void sendMessage(Comando comando) {
+        if (comando.getIp() != null) {
+            // Enviar solo a un nodo específico
+            SocketClient nodo = nodos.get(comando.getIp());
+            if (nodo != null) {
+                try {
+                    nodo.send(comando.getComando());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            // Enviar a todos los nodos
+            for (SocketClient nodo : nodos.values()) {
+                try {
+                    nodo.send(comando.getComando());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
-
     }
-
 
     @Override
     public void onNewNodo(SocketClient client) {
         synchronized (nodos) {
             nodos.put(client.getIp(), client);
         }
-        System.out.println("Nuevo Nodo " + client.getIp());
-        if(MyProperties.IS_NODO_PRINCIPAL){
-            System.out.println("Es nodo pro " + client.getIp());
-            // preparar el comando y enviar  a todo
-            Comando comando = new SincronizacionNodos(new ArrayList<>(nodos.keySet()));
+        if (MyProperties.IS_NODO_PRINCIPAL) {
+            List<String> listaIps = new ArrayList<>(nodos.keySet());
+            Comando comando = new SincronizacionNodos(listaIps);
             try {
                 client.send(comando.getComando());
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            // enviar candidatos
-            List<Candidato> candidatoes = new ArrayList<>();
-            candidatoes.add(new Candidato("1", "Alejandra"));
-            candidatoes.add(new Candidato("2", "Casita"));
-            candidatoes.add(new Candidato("3", "Lucas"));
-            comando = new SincronizacionCandidatos(candidatoes);
-            try {
-                client.send(comando.getComando());
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            // enviar votantes
-
-            // enviar bloques
         }
     }
-
 
     @Override
     public void onCloseNodo(SocketClient client) {

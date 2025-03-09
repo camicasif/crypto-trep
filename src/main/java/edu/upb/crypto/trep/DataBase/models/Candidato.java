@@ -8,6 +8,11 @@ public class Candidato {
         this.id = id;
         this.nombre = nombre;
     }
+    public Candidato(String str) {
+        String[] tokens = str.split(",");
+        this.id = tokens[0];
+        this.nombre = tokens[1];
+    }
 
     public String getId() {
         return id;
@@ -16,4 +21,10 @@ public class Candidato {
     public String getNombre() {
         return nombre;
     }
+
+    @Override
+    public String toString() {
+        return id + "," + nombre;
+    }
+
 }

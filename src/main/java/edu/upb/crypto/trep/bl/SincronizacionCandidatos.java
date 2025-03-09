@@ -18,6 +18,11 @@ public class SincronizacionCandidatos extends Comando{
         this.candidatoes = candidatos;
     }
 
+    public SincronizacionCandidatos(List<Candidato> candidatos, String ip) {
+        this.setIp(ip);
+        this.setCodigoComando("0002");
+        this.candidatoes = candidatos;
+    }
     public SincronizacionCandidatos(String ip){
         super();
         this.setCodigoComando("0002");
@@ -28,12 +33,13 @@ public class SincronizacionCandidatos extends Comando{
 //TODO rethink logic
     @Override
     public void parsear(String comando) {
+        System.out.println(comando);
         String[] tokens = comando.split(Pattern.quote("|"));
         if(tokens.length == 2){
             setCodigoComando(tokens[0]);
             String[] contAry = tokens[1].split(";");
             for (String s : contAry) {
-//                this.candidatoes.add(new Candidato(s));
+                this.candidatoes.add(new Candidato(s));
             }
         }
     }
@@ -44,9 +50,8 @@ public class SincronizacionCandidatos extends Comando{
     }
     private String ipsToString(){
         if(candidatoes.isEmpty()) return "";
-//TODO rethink logic
         StringBuilder str = new StringBuilder();
-//        str.append(candidatoes.getFirst().toString());
+        str.append(candidatoes.get(0).toString());
         for (int i = 1; i < candidatoes.size(); i++) {
             str.append(";");
             str.append(candidatoes.get(i).toString());
