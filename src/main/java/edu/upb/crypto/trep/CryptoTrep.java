@@ -35,7 +35,6 @@ public class CryptoTrep {
         server.start();
         server.addListener(ps);// Planificador de salida se suscribe a los eventos del server
         server.addPlanificadorEntrada(pe);
-
         ApacheServer apacheServer = new ApacheServer();
         apacheServer.start();
 

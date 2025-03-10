@@ -61,10 +61,9 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
 //    }
 
     private void sendMessage(Comando comando) {
-        if (comando.getIp() != null) {
-            // Enviar solo a un nodo específico
-            SocketClient nodo = nodos.get(comando.getIp());
-            if (nodo != null) {
+        if (comando.isPublic()) {
+            // Enviar a todos los nodos
+            for (SocketClient nodo : nodos.values()) {
                 try {
                     nodo.send(comando.getComando());
                 } catch (Exception e) {
@@ -72,8 +71,9 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
                 }
             }
         } else {
-            // Enviar a todos los nodos
-            for (SocketClient nodo : nodos.values()) {
+            // Enviar solo a un nodo específico
+            SocketClient nodo = nodos.get(comando.getIp());
+            if (nodo != null) {
                 try {
                     nodo.send(comando.getComando());
                 } catch (Exception e) {
@@ -101,7 +101,11 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
 
     @Override
     public void onCloseNodo(SocketClient client) {
-
+        //Todo
+//        synchronized (nodos) {
+//            nodos.remove(client.getIp());
+//            System.out.println("Nodo " + client.getIp() + " removido de la lista de nodos.");
+//        }
     }
 
     @Override

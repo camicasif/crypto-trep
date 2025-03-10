@@ -8,6 +8,7 @@ import lombok.Setter;
 public abstract class Comando {
     private String ip;
     private String codigoComando;
+    private boolean isPublic;
     public Comando(String ip) {
         this.ip = ip;
     }

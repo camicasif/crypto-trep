@@ -15,10 +15,14 @@ public class SincronizacionNodos extends Comando{
     private List<String> ips;
     public SincronizacionNodos(List<String> ips) {
         this.ips = ips;
+        this.setCodigoComando(ComandoCodigo.SINCRONIZACION_NODOS);
     }
     public SincronizacionNodos(String ip){
         super();
         setIp(ip);
+        setPublic(false);
+        this.setCodigoComando(ComandoCodigo.SINCRONIZACION_NODOS);
+
     }
 
 
@@ -35,8 +39,8 @@ public class SincronizacionNodos extends Comando{
     public String getComando() {
 
         if (ips == null || ips.isEmpty()) {
-            return "0001|"+ System.lineSeparator();
+            return getCodigoComando()+"|"+ System.lineSeparator();
         }
-        return "0001|" + String.join(";", ips) + System.lineSeparator();
+        return getCodigoComando()+"|" + String.join(";", ips) + System.lineSeparator();
     }
 }

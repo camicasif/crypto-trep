@@ -1,8 +1,8 @@
 package edu.upb.crypto.trep.modsincronizacion;
 
 import edu.upb.crypto.trep.DataBase.models.Candidato;
-import edu.upb.crypto.trep.bl.Comando;
-import edu.upb.crypto.trep.bl.SincronizacionCandidatos;
+import edu.upb.crypto.trep.DataBase.models.Votante;
+import edu.upb.crypto.trep.bl.*;
 import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 
@@ -35,32 +35,89 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
             assert comando != null;
 
             switch (comando.getCodigoComando()) {
-                case "0001":
+                case ComandoCodigo.SINCRONIZACION_NODOS:
                     // Manejo del comando 0001 (ya implementado)
                     break;
 
-                case "0002":
-                    procesarComando2(comando);
+                case ComandoCodigo.SINCRONIZACION_CANDIDATOS:
+                    procesarComandoSincronizacionCandidatos((SincronizacionCandidatos) comando);
                     break;
 
-                // Aquí irán más comandos en el futuro (0003, 0004, etc.)
+                case ComandoCodigo.ALTA_CANDIDATO:
+                    procesarComandoAltaCandidato((AltaCandidato) comando);
+                    break;
+                case ComandoCodigo.ELIMINAR_CANDIDATO:
+                    procesarEliminarCandidato((EliminarCandidato) comando);
+                    break;
+                case ComandoCodigo.SINCRONIZACION_VOTANTES:
+                    procesarComandoSincronizacionVotantes((SincronizacionVotantes) comando);
+
+                    break;
+                case ComandoCodigo.ALTA_VOTANTE:
+                    procesarComandoAltaVotante((AltaVotante) comando);
+
+                    break;
+                case ComandoCodigo.ELIMINAR_VOTANTE:
+                    procesarEliminarVotante((EliminarVotante) comando);
+
+                    break;
+                default:
+                    System.out.println("Comando no identificado: " +comando.getCodigoComando());
+                    break;
             }
         }
     }
 
-    private void procesarComando2(Comando comando) {
+    private void procesarComandoSincronizacionCandidatos(SincronizacionCandidatos comando) {
 
         //TODO BD sacar los candidatos de una lista
         List<Candidato> candidatos = new ArrayList<>();
         candidatos.add(new Candidato("1", "Alejandra"));
         candidatos.add(new Candidato("2", "Casita"));
         candidatos.add(new Candidato("3", "Lucas"));
+        comando.setCandidatoes(candidatos);
 
-        // Crear el mensaje
-        Comando respuesta = new SincronizacionCandidatos(candidatos, comando.getIp());
+        PlanificadorMensajesSalida.addMessage(comando);
+    }
 
-        // Enviar solo al nodo que hizo la petición
-        PlanificadorMensajesSalida.addMessage(respuesta);
+    private void procesarComandoAltaCandidato(AltaCandidato comando) {
+
+        //TODO BD verificar que no exista un candidato con el mismo codigo
+
+        PlanificadorMensajesSalida.addMessage(comando);
+    }
+
+    private void procesarEliminarCandidato(EliminarCandidato comando) {
+
+        //TODO BD verificar que  exista un candidato con el mismo codigo y eliminarlo
+
+        PlanificadorMensajesSalida.addMessage(comando);
+    }
+
+    private void procesarComandoSincronizacionVotantes(SincronizacionVotantes comando) {
+
+        //TODO BD sacar los votantes en una lista
+        List<Votante> votantes = new ArrayList<>();
+        votantes.add(new Votante("00045242", "dasdsadasdasdas"));
+        votantes.add(new Votante("0136464", "fsdfsdfsdfdsfds"));
+        votantes.add(new Votante("0000465", "asdasdasdasdasdas"));
+        comando.setVotantes(votantes);
+
+        PlanificadorMensajesSalida.addMessage(comando);
+    }
+
+    private void procesarComandoAltaVotante(AltaVotante comando) {
+
+        //TODO BD verificar que no exista un votante con el mismo codigo
+
+        PlanificadorMensajesSalida.addMessage(comando);
+    }
+
+    private void procesarEliminarVotante(EliminarVotante comando) {
+
+        //TODO BD verificar que  exista un votante con el mismo codigo y eliminarlo
+
+        PlanificadorMensajesSalida.addMessage(comando);
     }
 
 
@@ -71,6 +128,7 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
 
     @Override
     public void onCloseNodo(SocketClient client) {
+        // no implementar
 
     }
 

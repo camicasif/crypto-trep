@@ -14,19 +14,17 @@ import java.util.regex.Pattern;
 public class SincronizacionCandidatos extends Comando{
     private List<Candidato> candidatoes;
     public SincronizacionCandidatos(List<Candidato> candidatos) {
-        this.setCodigoComando("0002");
+        this.setCodigoComando(ComandoCodigo.SINCRONIZACION_CANDIDATOS);
         this.candidatoes = candidatos;
+        setPublic(false);
     }
 
-    public SincronizacionCandidatos(List<Candidato> candidatos, String ip) {
-        this.setIp(ip);
-        this.setCodigoComando("0002");
-        this.candidatoes = candidatos;
-    }
     public SincronizacionCandidatos(String ip){
         super();
-        this.setCodigoComando("0002");
+        this.setCodigoComando(ComandoCodigo.SINCRONIZACION_CANDIDATOS);
+
         setIp(ip);
+        setPublic(false);
         this.candidatoes = new ArrayList<>();
     }
 
