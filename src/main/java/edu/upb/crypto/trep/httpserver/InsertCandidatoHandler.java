@@ -4,6 +4,9 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import edu.upb.crypto.trep.DataBase.Functions;
+import edu.upb.crypto.trep.DataBase.models.Candidato;
+import edu.upb.crypto.trep.bl.AltaCandidato;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
 import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +33,8 @@ public class InsertCandidatoHandler implements HttpHandler {
 
             // Insert into database
             Functions.insertCandidato(id, nombre);
+
+            PlanificadorMensajesSalida.addMessage(new AltaCandidato(new Candidato(id,nombre),""));
 
             // Send response
             JsonObject jsonResponse = new JsonObject();

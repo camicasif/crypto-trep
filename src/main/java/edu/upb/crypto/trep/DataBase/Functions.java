@@ -5,10 +5,7 @@ import com.google.gson.JsonObject;
 import org.apache.log4j.Logger;
 import edu.upb.crypto.trep.Utils;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class Functions {
     private static final int MAX_ROWS_PER_BLOQUE = 5;
@@ -31,22 +28,45 @@ public class Functions {
 
     // Insert data into Votante table
     public static String insertVotante(String codigo) {
-        System.out.println("insertVotante");
-        String llavePrivada = Utils.generateUniqueKey(); // Generate key
+        logger.info("Iniciando inserción de votante con código: " + codigo);
+
+        String llavePrivada = Utils.generateUniqueKey(); // Generar clave única
         String sql = "INSERT INTO Votante (codigo, llave_privada) VALUES (?, ?)";
 
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
+
+            // Configurar los parámetros
             statement.setString(1, codigo);
             statement.setString(2, llavePrivada);
-            statement.executeUpdate();
-            logger.info("Inserted data into Votante table");
-            return llavePrivada; // Return the key
+
+            // Ejecutar la inserción
+            int rowsInserted = statement.executeUpdate();
+
+            // Verificar si se insertó algo
+            if (rowsInserted == 0) {
+                logger.warn("No se insertó ningún votante para el código: " + codigo);
+                return null;
+            }
+
+            logger.info("Votante insertado exitosamente con código: " + codigo);
+            return llavePrivada;
+
+        } catch (SQLIntegrityConstraintViolationException e) {
+            logger.warn("Intento de insertar votante duplicado: " + codigo, e);
+            return "DUPLICATE"; // Indicar que ya existe ese código
+
         } catch (SQLException e) {
-            logger.error("Error inserting data into Votante table", e);
-            return null;
+            logger.error("Error SQL al insertar votante con código: " + codigo, e);
+            return "DB_ERROR"; // Indicar error de base de datos
+
+        } catch (Exception e) {
+            logger.error("Error inesperado al insertar votante con código: " + codigo, e);
+            return "UNKNOWN_ERROR"; // Captura de errores inesperados
+
         }
     }
+
 
     public static void createCandidatosTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Candidatos (" +
