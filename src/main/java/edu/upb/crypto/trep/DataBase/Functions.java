@@ -2,6 +2,8 @@ package edu.upb.crypto.trep.DataBase;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import edu.upb.crypto.trep.DataBase.models.Candidato;
+import edu.upb.crypto.trep.DataBase.models.Votante;
 import org.apache.log4j.Logger;
 import edu.upb.crypto.trep.Utils;
 
@@ -9,10 +11,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Functions {
     private static final int MAX_ROWS_PER_BLOQUE = 5;
     static Logger logger = Logger.getLogger(Functions.class);
+
+    public static void initializer(){
+        createVotanteTable();
+        createCandidatosTable();
+        createCandidatosTable();
+    }
+
 
     // Create Votante table
     public static void createVotanteTable() {
@@ -48,6 +59,29 @@ public class Functions {
         }
     }
 
+    public static boolean deleteVotante(String codigo) {
+        System.out.println("borrarVotante");
+        String sql = "DELETE FROM Votante WHERE codigo = ?";
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.setString(1, codigo);
+            int rowsDeleted = statement.executeUpdate();
+            if (rowsDeleted > 0) {
+                logger.info("Votante eliminado correctamente: Código=" + codigo);
+                return true;
+            } else {
+                logger.warn("No se encontró el votante con Código=" + codigo);
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("Error eliminando votante", e);
+            return false;
+        }
+    }
+
+
+
     public static void createCandidatosTable() {
         String sql = "CREATE TABLE IF NOT EXISTS Candidatos (" +
                 "id TEXT PRIMARY KEY, " +
@@ -74,6 +108,27 @@ public class Functions {
             logger.info("Inserted data into Candidatos table");
         } catch (SQLException e) {
             logger.error("Error inserting data into Candidatos table", e);
+        }
+    }
+
+    public static boolean deleteCandidato(String id) {
+        System.out.println("BorrarCandidato");
+        String sql = "DELETE FROM Candidatos WHERE id = ?";
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.setString(1, id);
+            int rowsDeleted = statement.executeUpdate();
+            if (rowsDeleted > 0) {
+                logger.info("Candidato eliminado correctamente: ID=" + id);
+                return true;
+            } else {
+                logger.warn("No se encontró el candidato con ID=" + id);
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("Error eliminando candidato", e);
+            return false;
         }
     }
 
@@ -148,6 +203,25 @@ public class Functions {
             logger.info("Inserted data into " + tableName);
         } catch (SQLException e) {
             logger.error("Error inserting data into " + tableName, e);
+        }
+    }
+
+    public static boolean deleteBloque(String tableName) {
+        if (!tableName.matches("Bloque_\\d{4}")) {
+            logger.error("Nombre de tabla de bloque no válido: " + tableName);
+            return false;
+        }
+
+        String sql = "DROP TABLE IF EXISTS " + tableName;
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.executeUpdate();
+            logger.info("Bloque eliminado correctamente: " + tableName);
+            return true;
+        } catch (SQLException e) {
+            logger.error("Error eliminando bloque", e);
+            return false;
         }
     }
 
@@ -264,9 +338,9 @@ public class Functions {
     }
 
 
-    public static JsonArray getAllVotantes() {
-        System.out.println("getAllVotantes");
-        JsonArray votantes = new JsonArray();
+    public static List<Votante> getAllVotantes() {
+        System.out.println("ListaVotantes");
+        List<Votante> votantes = new ArrayList<>();
         String sql = "SELECT codigo, llave_privada FROM Votante";
 
         try (Connection con = DataBase.getInstance().getConnection();
@@ -274,9 +348,9 @@ public class Functions {
              ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
-                JsonObject votante = new JsonObject();
-                votante.addProperty("codigo", rs.getString("codigo"));
-                votante.addProperty("llave_privada", rs.getString("llave_privada"));
+                String codigo = rs.getString("codigo");
+                String llavePrivada = rs.getString("llave_privada");
+                Votante votante = new Votante(codigo, llavePrivada);
                 votantes.add(votante);
             }
         } catch (SQLException e) {
@@ -286,9 +360,9 @@ public class Functions {
         return votantes;
     }
 
-    public static JsonArray getAllCandidatos() {
-        System.out.println("getAllCandidatos");
-        JsonArray candidatos = new JsonArray();
+    public static List<Candidato> getAllCandidatos() {
+        System.out.println("ListaCandidatos");
+        List<Candidato> candidatos = new ArrayList<>();
         String sql = "SELECT id, nombre FROM Candidatos";
 
         try (Connection con = DataBase.getInstance().getConnection();
@@ -296,9 +370,9 @@ public class Functions {
              ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
-                JsonObject candidato = new JsonObject();
-                candidato.addProperty("id", rs.getString("id"));
-                candidato.addProperty("nombre", rs.getString("nombre"));
+                String id = rs.getString("id");
+                String nombre = rs.getString("nombre");
+                Candidato candidato = new Candidato(id, nombre);
                 candidatos.add(candidato);
             }
         } catch (SQLException e) {

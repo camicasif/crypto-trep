@@ -34,7 +34,7 @@ public class PersonaCliente {
 
 
 
-            dataOutputStream.write(mensaje7.getBytes("UTF-8"));
+            dataOutputStream.write(mensaje5.getBytes("UTF-8"));
             dataOutputStream.flush();
 
             // Leer respuesta del servidor en bucle
