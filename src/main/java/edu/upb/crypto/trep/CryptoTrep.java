@@ -5,6 +5,7 @@
 package edu.upb.crypto.trep;
 
 
+import edu.upb.crypto.trep.DataBase.Functions;
 import edu.upb.crypto.trep.config.MyProperties;
 import edu.upb.crypto.trep.httpserver.ApacheServer;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesEntrada;
@@ -23,6 +24,7 @@ import java.net.Socket;
 public class CryptoTrep {
 
     public static void main(String[] args) throws IOException {
+        Functions.initializer();
         System.out.println(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
         System.out.println(":::::::::::::::: Iniciando Crypto Trep ::::::::::::::::::");
         System.out.println(":::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
