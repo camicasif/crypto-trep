@@ -38,6 +38,8 @@ public class RegisterVoteHandler implements HttpHandler {
             String hmac = new HmacUtils(HmacAlgorithms.HMAC_SHA_256,
                     llavePrivada.getBytes(StandardCharsets.UTF_8))
                     .hmacHex(requestBody.getBytes(StandardCharsets.UTF_8));
+
+            //TODO sacar la firma de base de datos para comparar
             if(xSignature.equals(hmac)){
                 System.out.println("Firma exitosa");
             }
