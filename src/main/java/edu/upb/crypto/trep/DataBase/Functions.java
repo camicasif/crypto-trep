@@ -21,7 +21,7 @@ public class Functions {
     public static void initializer(){
         createVotanteTable();
         createCandidatosTable();
-        createCandidatosTable();
+        createInitialBloqueTable();
     }
 
 
@@ -138,7 +138,7 @@ public class Functions {
 
         String sql = "CREATE TABLE IF NOT EXISTS " + nextBlock + " (" +
                 "id TEXT PRIMARY KEY, " +
-                "codigo_volante TEXT, " +
+                "codigo_votante TEXT, " +
                 "codigo_candidato TEXT, " +
                 "hash TEXT, " +
                 "ref_anterior_bloque TEXT)";
@@ -164,7 +164,7 @@ public class Functions {
 
         String sql = "CREATE TABLE IF NOT EXISTS " + nextBlock + " (" +
                 "id TEXT PRIMARY KEY, " +
-                "codigo_volante TEXT, " +
+                "codigo_votante TEXT, " +
                 "codigo_candidato TEXT, " +
                 "hash TEXT, " +
                 "ref_anterior_bloque TEXT)";
@@ -178,7 +178,7 @@ public class Functions {
         }
     }
 
-    public static void insertBloqueData(String id, String codigoVolante, String codigoCandidato) {
+    public static void insertBloqueData(String id, String codigoVotante, String codigoCandidato) {
         String tableName = getLatestBlockTable();
 
         if (isTableFull(tableName)) {
@@ -186,16 +186,16 @@ public class Functions {
             tableName = getLatestBlockTable(); // Update to the new table name
         }
 
-        String hash = Utils.getSHA256(id + codigoVolante + codigoCandidato);
+        String hash = Utils.getSHA256(id + codigoVotante + codigoCandidato);
 
         String refAnteriorBloque = getPreviousBlockHash(tableName);
 
-        String sql = "INSERT INTO " + tableName + " (id, codigo_volante, codigo_candidato, hash, ref_anterior_bloque) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO " + tableName + " (id, codigo_votante, codigo_candidato, hash, ref_anterior_bloque) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.setString(1, id);
-            statement.setString(2, codigoVolante);
+            statement.setString(2, codigoVotante);
             statement.setString(3, codigoCandidato);
             statement.setString(4, hash);
             statement.setString(5, refAnteriorBloque);
@@ -302,7 +302,7 @@ public class Functions {
 
     public static String getConcatenatedTableData(String tableName) {
         StringBuilder concatenatedData = new StringBuilder();
-        String query = "SELECT id, codigo_volante, codigo_candidato, hash, ref_anterior_bloque FROM " + tableName;
+        String query = "SELECT id, codigo_votante, codigo_candidato, hash, ref_anterior_bloque FROM " + tableName;
 
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(query);
@@ -310,7 +310,7 @@ public class Functions {
 
             while (rs.next()) {
                 concatenatedData.append(rs.getString("id"))
-                        .append(rs.getString("codigo_volante"))
+                        .append(rs.getString("codigo_votante"))
                         .append(rs.getString("codigo_candidato"))
                         .append(rs.getString("hash"))
                         .append(rs.getString("ref_anterior_bloque"));
@@ -404,7 +404,7 @@ public class Functions {
                     while (rowRs.next()) {
                         JsonObject row = new JsonObject();
                         row.addProperty("id", rowRs.getString("id"));
-                        row.addProperty("codigo_volante", rowRs.getString("codigo_volante"));
+                        row.addProperty("codigo_votante", rowRs.getString("codigo_votante"));
                         row.addProperty("codigo_candidato", rowRs.getString("codigo_candidato"));
                         row.addProperty("hash", rowRs.getString("hash"));
                         row.addProperty("ref_anterior_bloque", rowRs.getString("ref_anterior_bloque"));
