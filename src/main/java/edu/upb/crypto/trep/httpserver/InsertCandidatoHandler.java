@@ -7,6 +7,8 @@ import edu.upb.crypto.trep.DataBase.Functions;
 import edu.upb.crypto.trep.DataBase.models.Candidato;
 import edu.upb.crypto.trep.bl.AltaCandidato;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +21,9 @@ public class InsertCandidatoHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+
+//        String xSignature = exchange.getResponseBody("X-Signature")
+        String xSignature = "23";
         try (InputStream is = exchange.getRequestBody();
              OutputStream os = exchange.getResponseBody()) {
 
@@ -31,6 +36,12 @@ public class InsertCandidatoHandler implements HttpHandler {
             String id = jsonRequest.get("id").getAsString();
             String nombre = jsonRequest.get("nombre").getAsString();
 
+            String hmac =
+                    new HmacUtils(HmacAlgorithms.HMAC_SHA_256, "").hmacHex(requestBody.getBytes(StandardCharsets.UTF_8));
+
+            if (xSignature.equals(hmac)){
+                System.out.println("Firma exitosa");
+            }
             // Insert into database
             Functions.insertCandidato(id, nombre);
 

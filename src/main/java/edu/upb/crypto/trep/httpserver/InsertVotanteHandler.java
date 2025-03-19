@@ -9,7 +9,10 @@ import edu.upb.crypto.trep.DataBase.models.Votante;
 import edu.upb.crypto.trep.Utils;
 import edu.upb.crypto.trep.bl.AltaCandidato;
 import edu.upb.crypto.trep.bl.AltaVotante;
+import edu.upb.crypto.trep.config.MyProperties;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +26,7 @@ public class InsertVotanteHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         try (InputStream is = exchange.getRequestBody();
              OutputStream os = exchange.getResponseBody()) {
-
+//            String xSignature = exchange.getRequestHeaders().get("X-Signature").get(0);
             // Leer el cuerpo de la solicitud
             Scanner scanner = new Scanner(is, StandardCharsets.UTF_8.name());
             String requestBody = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
@@ -38,6 +41,14 @@ public class InsertVotanteHandler implements HttpHandler {
 
                 // Intentar insertar en la base de datos
                 String llavePrivada = Functions.insertVotante(codigo);
+
+//                String hmac = new HmacUtils(HmacAlgorithms.HMAC_SHA_256,
+//                        MyProperties.SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+//                        .hmacHex(requestBody.getBytes(StandardCharsets.UTF_8));
+//                if(xSignature.equals(hmac)){
+//                    // OK
+//                    System.out.println("Firma exitosa");
+//                }
 
                 if (llavePrivada != null && !llavePrivada.isEmpty()) {
                     // Si la inserción fue exitosa, añadimos el mensaje de salida

@@ -8,6 +8,8 @@ import java.util.Properties;
 
 public class MyProperties {
     public static boolean IS_NODO_PRINCIPAL = false;
+    public static String SECRET_KEY = "ed2eea4451174aeb9161e0cc1fdf304d4982b18497a6e2842ee3f27ea0948d28";
+
     public static String IP_NODO_PRINCIPAL;
     static {
         Properties prop = new Properties();

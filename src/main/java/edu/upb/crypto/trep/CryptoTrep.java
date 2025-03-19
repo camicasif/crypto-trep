@@ -10,6 +10,8 @@ import edu.upb.crypto.trep.config.MyProperties;
 import edu.upb.crypto.trep.httpserver.ApacheServer;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesEntrada;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorPresidente;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorTransacciones;
 import edu.upb.crypto.trep.modsincronizacion.server.Server;
 import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 
@@ -32,6 +34,11 @@ public class CryptoTrep {
         ps.start();
         PlanificadorMensajesEntrada pe = new PlanificadorMensajesEntrada();
         pe.start();
+
+        PlanificadorPresidente pp = new PlanificadorPresidente();
+        pp.start();
+        PlanificadorTransacciones pt = new PlanificadorTransacciones();
+        pt.start();
 
         if(MyProperties.IS_NODO_PRINCIPAL) {
 
