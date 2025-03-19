@@ -5,6 +5,9 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import edu.upb.crypto.trep.DataBase.Functions;
 import edu.upb.crypto.trep.Utils;
+import edu.upb.crypto.trep.config.MyProperties;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -18,6 +21,8 @@ public class RegisterVoteHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+
+
         if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
             InputStream is = exchange.getRequestBody();
             Scanner s = new Scanner(is).useDelimiter("\\A");
@@ -26,13 +31,20 @@ public class RegisterVoteHandler implements HttpHandler {
             JsonObject jsonRequest = com.google.gson.JsonParser.parseString(requestBody).getAsJsonObject();
             String codigoVotante = jsonRequest.get("codigo_votante").getAsString();
             String codigoCandidato = jsonRequest.get("codigo_candidato").getAsString();
-            String firma = jsonRequest.get("firma").getAsString();
 
-            // Verify firma using HMAC
             String llavePrivada = Functions.getLlavePrivada(codigoVotante);
+
+            String xSignature = exchange.getRequestHeaders().get("X-Signature").get(0);
+            String hmac = new HmacUtils(HmacAlgorithms.HMAC_SHA_256,
+                    llavePrivada.getBytes(StandardCharsets.UTF_8))
+                    .hmacHex(requestBody.getBytes(StandardCharsets.UTF_8));
+            if(xSignature.equals(hmac)){
+                System.out.println("Firma exitosa");
+            }
+
             String expectedFirma = Utils.calculateHMAC(codigoVotante + codigoCandidato, llavePrivada);
 
-            if (!firma.equals(expectedFirma)) {
+            if (!hmac.equals(expectedFirma)) {
                 JsonObject errorResponse = new JsonObject();
                 errorResponse.addProperty("status", "NOK");
                 errorResponse.addProperty("message", "Invalid firma");
