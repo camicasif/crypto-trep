@@ -4,8 +4,12 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import edu.upb.crypto.trep.DataBase.Functions;
+import edu.upb.crypto.trep.DataBase.models.Voto;
 import edu.upb.crypto.trep.Utils;
+import edu.upb.crypto.trep.bl.Votacion;
 import edu.upb.crypto.trep.config.MyProperties;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorPresidente;
 import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.log4j.Logger;
@@ -15,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.UUID;
 
 public class RegisterVoteHandler implements HttpHandler {
     static Logger logger = Logger.getLogger(RegisterVoteHandler.class);
@@ -39,7 +44,7 @@ public class RegisterVoteHandler implements HttpHandler {
                     llavePrivada.getBytes(StandardCharsets.UTF_8))
                     .hmacHex(requestBody.getBytes(StandardCharsets.UTF_8));
 
-            //TODO sacar la firma de base de datos para comparar
+            //TODO sacar la firma del header qe envien para comparar
             if(xSignature.equals(hmac)){
                 System.out.println("Firma exitosa");
             }
@@ -54,16 +59,31 @@ public class RegisterVoteHandler implements HttpHandler {
                 OutputStream os = exchange.getResponseBody();
                 os.write(errorResponse.toString().getBytes(StandardCharsets.UTF_8));
                 os.close();
-                return;
+//                return;
             }
+            //todo cual va a ser el id del voto
+            //todo la firma va a ser el hmac o expectedfirma
 
-            // Insert vote into Bloque_x table
-            String uniqueId = Utils.generateUniqueKey();
-            Functions.insertBloqueData(uniqueId, codigoVotante, codigoCandidato);
+
+            Voto voto = new Voto(UUID.randomUUID().toString(),
+                    codigoVotante,
+                    codigoCandidato);
+            Votacion comando = new Votacion(voto, "randomFirma");
+            PlanificadorMensajesSalida.addMessage(comando);
+            PlanificadorPresidente.add(comando);
+
+
+
+
+
+           //Todo revisar esto comentado (a que se refiere con codigo de bloque)
+              //Insert vote into Bloque_x table
+//            String uniqueId = Utils.generateUniqueKey();
+//            Functions.insertBloqueData(uniqueId, codigoVotante, codigoCandidato);
 
             JsonObject jsonResponse = new JsonObject();
             jsonResponse.addProperty("status", "OK");
-            jsonResponse.addProperty("unique_id", uniqueId);
+//            jsonResponse.addProperty("unique_id", uniqueId);
 
             String response = jsonResponse.toString();
             exchange.sendResponseHeaders(200, response.length());

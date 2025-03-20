@@ -8,12 +8,14 @@ import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
 import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class PlanificadorPresidente extends Thread implements SocketEvent {
+public class PlanificadorPresidente implements Runnable {
 
-    private static final ConcurrentLinkedQueue<Comando> messages =new ConcurrentLinkedQueue<>();
+    private static final Map<String, Comando> votos =new HashMap<String,Comando>();
     public PlanificadorPresidente() {
 
     }
@@ -21,108 +23,41 @@ public class PlanificadorPresidente extends Thread implements SocketEvent {
 
     @Override
     public void run() {
-        while (true) {
-            Comando comando ;
-            synchronized (messages) {
-                if (messages.isEmpty()) {
-                    try {
-                        messages.wait();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+        synchronized (votos){
+            for (String key: votos.keySet()){
+                Votacion comando = (Votacion) votos.get(key);
+                if ((System.currentTimeMillis() - comando.getTiempoCreacion() )> 10000){
+                    System.out.println("Ya no es valido el registro");
+
+                    votos.remove(key);
+
+                    return;
                 }
-                comando = messages.poll();
-            }
-            assert comando != null;
+                if (comando.getCantidadConfirmados() ==1){
+                    return;
+                }
 
-            switch (comando.getCodigoComando()) {
-                case ComandoCodigo.SINCRONIZACION_NODOS:
-                    // Manejo del comando 0001 (ya implementado)
-                    break;
 
-                case ComandoCodigo.SINCRONIZACION_CANDIDATOS:
-                    procesarComandoSincronizacionCandidatos((SincronizacionCandidatos) comando);
-                    break;
-
-                case ComandoCodigo.ALTA_CANDIDATO:
-                    procesarComandoAltaCandidato((AltaCandidato) comando);
-                    break;
-                case ComandoCodigo.ELIMINAR_CANDIDATO:
-                    procesarEliminarCandidato((EliminarCandidato) comando);
-                    break;
-                case ComandoCodigo.SINCRONIZACION_VOTANTES:
-                    procesarComandoSincronizacionVotantes((SincronizacionVotantes) comando);
-
-                    break;
-                case ComandoCodigo.ALTA_VOTANTE:
-                    procesarComandoAltaVotante((AltaVotante) comando);
-
-                    break;
-                case ComandoCodigo.ELIMINAR_VOTANTE:
-                    procesarEliminarVotante((EliminarVotante) comando);
-
-                    break;
-                default:
-                    System.out.println("Comando no identificado: " +comando.getCodigoComando());
-                    break;
             }
         }
     }
 
-    private void procesarComandoSincronizacionCandidatos(SincronizacionCandidatos comando) {
 
-        List<Candidato> candidatos = Functions.getAllCandidatos();
-        comando.setCandidatoes(candidatos);
-        PlanificadorMensajesSalida.addMessage(comando);
-    }
+    public static void add(Votacion comando){
+        synchronized (votos){
 
-    private void procesarComandoAltaCandidato(AltaCandidato comando) {
-
-        Functions.insertCandidato(comando.getCandidato().getId(), comando.getCandidato().getNombre());
-        PlanificadorMensajesSalida.addMessage(comando);
-    }
-
-    private void procesarEliminarCandidato(EliminarCandidato comando) {
-        Functions.deleteCandidato(comando.getCodigoCandidato());
-        PlanificadorMensajesSalida.addMessage(comando);
-    }
-
-    private void procesarComandoSincronizacionVotantes(SincronizacionVotantes comando) {
-
-        List<Votante> votantes = Functions.getAllVotantes();
-        comando.setVotantes(votantes);
-
-        PlanificadorMensajesSalida.addMessage(comando);
-    }
-
-    private void procesarComandoAltaVotante(AltaVotante comando) {
-
-       Functions.insertVotante(comando.getVotante().getCodigo());
-        PlanificadorMensajesSalida.addMessage(comando);
-    }
-
-    private void procesarEliminarVotante(EliminarVotante comando) {
-        Functions.deleteVotante(comando.getCodigoVotante());
-        PlanificadorMensajesSalida.addMessage(comando);
-    }
-
-
-    @Override
-    public void onNewNodo(SocketClient client) {
-        // no implementar
-    }
-
-    @Override
-    public void onCloseNodo(SocketClient client) {
-        // no implementar
-
-    }
-
-    @Override
-    public void onMessage(Comando comando) {
-        synchronized (messages){
-            messages.add(comando);
-            messages.notify();
+           votos.put(comando.getVoto().getId(),comando);
+           votos.notify();
         }
     }
+
+    public static void add(String idVoto){
+        synchronized (votos){
+            Votacion cv = (Votacion) votos.get(idVoto);
+            cv.setCantidadConfirmados(cv.getCantidadConfirmados()+1);
+            votos.notify();
+        }
+    }
+
+
 }

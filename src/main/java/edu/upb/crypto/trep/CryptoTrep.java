@@ -17,6 +17,9 @@ import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -35,12 +38,6 @@ public class CryptoTrep {
         PlanificadorMensajesEntrada pe = new PlanificadorMensajesEntrada();
         pe.start();
 
-        PlanificadorPresidente pp = new PlanificadorPresidente();
-        pp.start();
-        PlanificadorTransacciones pt = new PlanificadorTransacciones();
-        pt.start();
-
-        if(MyProperties.IS_NODO_PRINCIPAL) {
 
             Server server = new Server();
             server.start();
@@ -48,7 +45,11 @@ public class CryptoTrep {
             server.addPlanificadorEntrada(pe);
             ApacheServer apacheServer = new ApacheServer();
             apacheServer.start();
-        }
+
+            PlanificadorPresidente pp = new PlanificadorPresidente();
+            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+            scheduler.scheduleAtFixedRate(pp,0,1, TimeUnit.SECONDS);
+
         System.out.println(":::::::::::::::: Crypto Trep Iniciando ::::::::::::::::::");
         System.out.println(":::::::::::::::: NODO PRINCIPAL: "+MyProperties.IS_NODO_PRINCIPAL+" :::::::::::::::::::");
         System.out.println(":::::::::::::::: IP NODO PRINCIPAL: "+MyProperties.IP_NODO_PRINCIPAL+" :::::::::");

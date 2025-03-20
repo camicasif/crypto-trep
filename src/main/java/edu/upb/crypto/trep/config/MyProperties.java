@@ -11,6 +11,9 @@ public class MyProperties {
     public static String SECRET_KEY = "ed2eea4451174aeb9161e0cc1fdf304d4982b18497a6e2842ee3f27ea0948d28";
 
     public static String IP_NODO_PRINCIPAL;
+
+    public static int CANTIDAD_NODOS=9;
+
     static {
         Properties prop = new Properties();
         try {
@@ -20,6 +23,7 @@ public class MyProperties {
         }
         IS_NODO_PRINCIPAL = Boolean.parseBoolean(prop.getProperty("nodo.principal"));
         IP_NODO_PRINCIPAL = prop.getProperty("nodo.principal.ip");
+        CANTIDAD_NODOS = Integer.parseInt( prop.getProperty("cantidad.nodos"));
     }
     private MyProperties() {}
 }
