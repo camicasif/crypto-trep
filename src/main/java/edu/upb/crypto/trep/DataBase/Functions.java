@@ -150,10 +150,10 @@ public class Functions {
     }
 
     // Insert data into Votante table
-    public static String insertVotante(String codigo) {
+    public static String insertVotante(String codigo, String llavePrivada) {
         System.out.println("insertVotante");
-        String llavePrivada = Utils.generateUniqueKey(); // Generate key
-        String sql = "INSERT INTO Votante (codigo, llave_privada) VALUES (?, ?)";
+//        String llavePrivada = Utils.generateUniqueKey(); // Generate key
+        String sql = "INSERT INTO Votante (codigo, llavePrivada) VALUES (?, ?)";
 
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {

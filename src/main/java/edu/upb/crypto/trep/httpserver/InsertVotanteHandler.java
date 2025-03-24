@@ -38,9 +38,11 @@ public class InsertVotanteHandler implements HttpHandler {
                 // Parsear el JSON
                 JsonObject jsonRequest = new com.google.gson.JsonParser().parse(requestBody).getAsJsonObject();
                 String codigo = jsonRequest.get("codigo").getAsString();
+                String llavePrivada = Utils.generateUniqueKey(); // Generate key
 
                 // Intentar insertar en la base de datos
-                String llavePrivada = Functions.insertVotante(codigo);
+//                String llavePrivada = Functions.insertVotante(codigo,);
+                String insertado = Functions.insertVotante(codigo,llavePrivada);
 
 //                String hmac = new HmacUtils(HmacAlgorithms.HMAC_SHA_256,
 //                        MyProperties.SECRET_KEY.getBytes(StandardCharsets.UTF_8))
@@ -50,7 +52,7 @@ public class InsertVotanteHandler implements HttpHandler {
 //                    System.out.println("Firma exitosa");
 //                }
 
-                if (llavePrivada != null && !llavePrivada.isEmpty()) {
+                if (insertado != null && !insertado.isEmpty()) {
                     // Si la inserción fue exitosa, añadimos el mensaje de salida
                     PlanificadorMensajesSalida.addMessage(new AltaVotante(new Votante(codigo, llavePrivada), ""));
 

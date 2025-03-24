@@ -9,6 +9,7 @@ public class Votante {
         this.llavePrivada = llavePrivada;
     }
     public Votante(String str) {
+        System.out.println("votante: "+str);
         String[] tokens = str.split(",");
         this.codigo = tokens[0];
         this.llavePrivada = tokens[1];

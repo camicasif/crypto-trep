@@ -9,11 +9,17 @@ import edu.upb.crypto.trep.DataBase.models.Voto;
 import edu.upb.crypto.trep.bl.*;
 import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
+import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
+@Slf4j
 public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
 
     private static final ConcurrentLinkedQueue<Comando> messages =new ConcurrentLinkedQueue<>();
@@ -40,7 +46,7 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
 
             switch (comando.getCodigoComando()) {
                 case ComandoCodigo.SINCRONIZACION_NODOS:
-                    // Manejo del comando 0001 (ya implementado)
+                    proceesarComando1((SincronizacionNodos) comando);
                     break;
 
                 case ComandoCodigo.SINCRONIZACION_CANDIDATOS:
@@ -90,41 +96,91 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
         }
     }
 
+    private void proceesarComando1(SincronizacionNodos comando) {
+        // Conectarse a todos los clientes
+        for (String ip : comando.getIps()) {
+            try {
+                log.info("IP A CONECTAR: " + ip);
+                if (ip.equals("127.0.0.1") || ip.equals("localhost")) {
+                    return;
+                }
+                if (!isMyIP(ip)) {
+                    SocketClient client = new SocketClient(new Socket(ip, 1825));
+                    client.start();
+                    PlanificadorMensajesSalida.addNode(client);
+                    log.info("PME - Conectado al nodo: " + ip);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private boolean isMyIP(String ip) {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces.hasMoreElements()) {
+                NetworkInterface iface = interfaces.nextElement();
+                if (iface.isLoopback() || !iface.isUp()) {
+                    continue;
+                }
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (ip.equals(addr.getHostAddress())) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            System.err.println("Error al obtener las interfaces de red: " + e.getMessage());
+        }
+        return false;
+    }
+
+
     private void procesarComandoSincronizacionCandidatos(SincronizacionCandidatos comando) {
 
-        List<Candidato> candidatos = Functions.getAllCandidatos();
-        comando.setCandidatoes(candidatos);
-        PlanificadorMensajesSalida.addMessage(comando);
+//        List<Candidato> candidatos = Functions.getAllCandidatos();
+        for (Candidato candidato : comando.getCandidatoes()) {
+            Functions.insertCandidato(candidato.getId(), candidato.getNombre());
+        }
+//        comando.setCandidatoes(candidatos);
+//        PlanificadorMensajesSalida.addMessage(comando);
     }
 
     private void procesarComandoAltaCandidato(AltaCandidato comando) {
 
         Functions.insertCandidato(comando.getCandidato().getId(), comando.getCandidato().getNombre());
-        PlanificadorMensajesSalida.addMessage(comando);
+//        PlanificadorMensajesSalida.addMessage(comando);
     }
 
     private void procesarEliminarCandidato(EliminarCandidato comando) {
         Functions.deleteCandidato(comando.getCodigoCandidato());
-        PlanificadorMensajesSalida.addMessage(comando);
+//        PlanificadorMensajesSalida.addMessage(comando);
     }
 
     private void procesarComandoSincronizacionVotantes(SincronizacionVotantes comando) {
 
-        List<Votante> votantes = Functions.getAllVotantes();
-        comando.setVotantes(votantes);
+        for (Votante votante : comando.getVotantes()) {
+            Functions.insertVotante(votante.getCodigo(), votante.getLlavePrivada());
+        }
+        //
+//        List<Votante> votantes = Functions.getAllVotantes();
+//        comando.setVotantes(votantes);
 
-        PlanificadorMensajesSalida.addMessage(comando);
+//        PlanificadorMensajesSalida.addMessage(comando);
     }
 
     private void procesarComandoAltaVotante(AltaVotante comando) {
 
-       Functions.insertVotante(comando.getVotante().getCodigo());
-        PlanificadorMensajesSalida.addMessage(comando);
+       Functions.insertVotante(comando.getVotante().getCodigo(), comando.getVotante().getLlavePrivada());
+//        PlanificadorMensajesSalida.addMessage(comando);
     }
 
     private void procesarEliminarVotante(EliminarVotante comando) {
         Functions.deleteVotante(comando.getCodigoVotante());
-        PlanificadorMensajesSalida.addMessage(comando);
+//        PlanificadorMensajesSalida.addMessage(comando);
     }
 
     private void sincronizarBloques(SincronizacionBloques comando){

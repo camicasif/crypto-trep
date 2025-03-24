@@ -70,12 +70,19 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
 //
 //    }
 
+
+    public static void addNode(SocketClient nodo) {
+        synchronized (nodos) {
+            nodos.put(nodo.getIp(), nodo);
+        }
+    }
     public static void sendCommand(String ip, Comando comando) {
         SocketClient client = nodos.get(ip);
         if (client != null) {
             client.send(comando);
         }
     }
+
 
 
     private void sendMessage(Comando comando) {
@@ -98,9 +105,17 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
     }
     @Override
     public void onNewNodo(SocketClient client) {
+
         synchronized (nodos) {
-            nodos.put(client.getIp(), client);
+            if (nodos.containsKey(client.getIp())) {
+                log.info("Ya existía el nodo, por lo que se reemplaza");
+                nodos.replace(client.getIp(), client);
+            } else {
+                nodos.put(client.getIp(), client);
+            }
         }
+        log.info("Nuevo nodo agregado:" + client.getIp());
+
         if (MyProperties.IS_NODO_PRINCIPAL) {
             List<String> listaIps = new ArrayList<>(nodos.keySet());
             Comando comando = new SincronizacionNodos(listaIps);
