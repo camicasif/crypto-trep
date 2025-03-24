@@ -24,6 +24,13 @@ public class Votacion extends Comando{
         this.tiempoCreacion = System.currentTimeMillis();
     }
 
+    public Votacion(String ip){
+        this.setCodigoComando(ComandoCodigo.VOTACION);
+        setIp(ip);
+        this.tiempoCreacion = System.currentTimeMillis();
+
+    }
+
     @Override
     public void parsear(String comando) {
         // Dividir el comando usando el delimitador "|"
@@ -39,26 +46,26 @@ public class Votacion extends Comando{
 
         // Extraer los datos del voto (segunda parte)
         String[] datosVoto = tokens[1].split(",");
-        if (datosVoto.length != 4) {
+        if (datosVoto.length != 5) {
             throw new IllegalArgumentException("Formato de datos de voto inválido. Se esperaban 4 valores separados por ','.");
         }
 
         // Crear un nuevo objeto Voto con los datos extraídos
         String idVoto = datosVoto[0];
-        String codigoVotante = datosVoto[1];
-        String codigoCandidato = datosVoto[2];
+        this.tiempoCreacion = Long.parseLong((String) datosVoto[1]);
+        String codigoVotante = datosVoto[2];
+        String codigoCandidato = datosVoto[3];
         this.voto = new Voto(idVoto, codigoVotante, codigoCandidato);
 
         // Extraer la firma (tercera parte)
         this.firma = tokens[2];
 
-        // Inicializar el tiempo de creación con el tiempo actual en milisegundos
-        this.tiempoCreacion = System.currentTimeMillis();
     }
 
     @Override
     public String getComando() {
-        return getCodigoComando()+"|"+ getVoto().getId()+","+getVoto().getCodigoVotante()+"," +getVoto().getCodigoCandidato()+","+null+
+        return getCodigoComando()+"|"+ getVoto().getId()+","+getTiempoCreacion()+","+getVoto().getCodigoVotante()+
+                "," +getVoto().getCodigoCandidato()+","+null+
                 "|"+getFirma()+ System.lineSeparator();
     }
 

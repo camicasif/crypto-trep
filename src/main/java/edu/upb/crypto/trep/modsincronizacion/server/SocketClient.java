@@ -6,6 +6,7 @@ package edu.upb.crypto.trep.modsincronizacion.server;
 
 
 import edu.upb.crypto.trep.bl.*;
+import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesEntrada;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
 import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 import lombok.Getter;
@@ -45,6 +46,7 @@ public class SocketClient extends Thread {
         try {
             String message;
             while ((message = br.readLine()) != null) {
+                System.out.println("Comando recibido, "+this.ip+" "+message);
                 String[] tokens = message.split(Pattern.quote("|"));
                 Comando comando = null;
                 switch (tokens[0]) {
@@ -76,6 +78,22 @@ public class SocketClient extends Thread {
                         comando = new EliminarVotante(this.ip);
                         comando.parsear(message);
                         break;
+                    case ComandoCodigo.SINCRONIZACION_BLOQUES:
+                        comando = new SincronizacionBloques(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case ComandoCodigo.VOTACION:
+                        comando = new Votacion(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case ComandoCodigo.CONFIRMACION_VOTO:
+                        comando = new ConfirmacionVoto(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case ComandoCodigo.CONFIRMACION_INSERT_BD:
+                        comando = new ConfirmacionInsertBD(this.ip);
+                        comando.parsear(message);
+                        break;
                     default:
                         System.out.println("Comando no identificado: "+ message);
                         break;
@@ -84,18 +102,9 @@ public class SocketClient extends Thread {
 
                 notificar(comando);
             }
-        } catch (IOException e) {
-            System.err.println("Error en la conexión con el nodo: " + ip);
-            eliminarSocket(this); // Eliminar el nodo de la lista en
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (br != null) br.close();
-                if (dout != null) dout.close();
-                if (socket != null) socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            PlanificadorMensajesSalida.removeCliente(this.ip);
         }
     }
 
@@ -108,20 +117,31 @@ public class SocketClient extends Thread {
         }
     }
 
+    public synchronized void send(Comando comando) {
+        try {
+            dout.write(comando.getComando().getBytes(StandardCharsets.UTF_8));
+            dout.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void addListerner(SocketEvent e) {
         listenerList.add(SocketEvent.class, e);
     }
 
     public void notificar(Comando comando) {
-        for (SocketEvent e : listenerList.getListeners(SocketEvent.class)) {
-            e.onMessage(comando);
-        }
+        PlanificadorMensajesEntrada.onMessage2(comando);
     }
 
     public void eliminarSocket(SocketClient socketClient) {
         for (SocketEvent e : listenerList.getListeners(SocketEvent.class)) {
             e.onCloseNodo(socketClient);
         }
+    }
+
+    public boolean isConnected() {
+        return this.socket.isConnected();
     }
 
 

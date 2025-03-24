@@ -15,7 +15,7 @@ public class SincronizacionVotantes extends Comando{
     public SincronizacionVotantes(List<Votante> votantes) {
         this.setCodigoComando(ComandoCodigo.SINCRONIZACION_VOTANTES);
         this.votantes = votantes;
-        setPublic(false);
+        setPublic(true);
     }
 
     public SincronizacionVotantes(String ip){
@@ -23,7 +23,7 @@ public class SincronizacionVotantes extends Comando{
         this.setCodigoComando(ComandoCodigo.SINCRONIZACION_VOTANTES);
 
         setIp(ip);
-        setPublic(false);
+        setPublic(true);
         this.votantes = new ArrayList<>();
     }
 

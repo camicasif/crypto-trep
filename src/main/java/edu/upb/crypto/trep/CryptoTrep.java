@@ -38,17 +38,20 @@ public class CryptoTrep {
         PlanificadorMensajesEntrada pe = new PlanificadorMensajesEntrada();
         pe.start();
 
-
+        if (MyProperties.IS_NODO_PRINCIPAL) {
             Server server = new Server();
             server.start();
             server.addListener(ps);// Planificador de salida se suscribe a los eventos del server
             server.addPlanificadorEntrada(pe);
             ApacheServer apacheServer = new ApacheServer();
             apacheServer.start();
-
+        }
             PlanificadorPresidente pp = new PlanificadorPresidente();
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        PlanificadorTransacciones pt = new PlanificadorTransacciones();
+
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
             scheduler.scheduleAtFixedRate(pp,0,1, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(pt,0,1, TimeUnit.SECONDS);
 
         System.out.println(":::::::::::::::: Crypto Trep Iniciando ::::::::::::::::::");
         System.out.println(":::::::::::::::: NODO PRINCIPAL: "+MyProperties.IS_NODO_PRINCIPAL+" :::::::::::::::::::");

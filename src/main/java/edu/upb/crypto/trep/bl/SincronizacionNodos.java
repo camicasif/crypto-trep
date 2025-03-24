@@ -20,7 +20,7 @@ public class SincronizacionNodos extends Comando{
     public SincronizacionNodos(String ip){
         super();
         setIp(ip);
-        setPublic(false);
+        setPublic(true);
         this.setCodigoComando(ComandoCodigo.SINCRONIZACION_NODOS);
 
     }

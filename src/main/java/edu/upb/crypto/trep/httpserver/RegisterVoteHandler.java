@@ -51,16 +51,16 @@ public class RegisterVoteHandler implements HttpHandler {
 
             String expectedFirma = Utils.calculateHMAC(codigoVotante + codigoCandidato, llavePrivada);
 
-            if (!hmac.equals(expectedFirma)) {
-                JsonObject errorResponse = new JsonObject();
-                errorResponse.addProperty("status", "NOK");
-                errorResponse.addProperty("message", "Invalid firma");
-                exchange.sendResponseHeaders(400, errorResponse.toString().length());
-                OutputStream os = exchange.getResponseBody();
-                os.write(errorResponse.toString().getBytes(StandardCharsets.UTF_8));
-                os.close();
-//                return;
-            }
+//            if (!hmac.equals(expectedFirma)) {
+//                JsonObject errorResponse = new JsonObject();
+//                errorResponse.addProperty("status", "NOK");
+//                errorResponse.addProperty("message", "Invalid firma");
+//                exchange.sendResponseHeaders(400, errorResponse.toString().length());
+//                OutputStream os = exchange.getResponseBody();
+//                os.write(errorResponse.toString().getBytes(StandardCharsets.UTF_8));
+//                os.close();
+////                return;
+//            }
             //todo cual va a ser el id del voto
             //todo la firma va a ser el hmac o expectedfirma
 
@@ -71,9 +71,6 @@ public class RegisterVoteHandler implements HttpHandler {
             Votacion comando = new Votacion(voto, "randomFirma");
             PlanificadorMensajesSalida.addMessage(comando);
             PlanificadorPresidente.add(comando);
-
-
-
 
 
            //Todo revisar esto comentado (a que se refiere con codigo de bloque)

@@ -11,13 +11,20 @@ import edu.upb.crypto.trep.config.MyProperties;
 import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.*;
 
+import lombok.extern.slf4j.Slf4j;
+
+
+@Slf4j
 public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
+
 
     private static final ConcurrentLinkedQueue<Comando> messages =new ConcurrentLinkedQueue<>();
     private static final ConcurrentHashMap<String, SocketClient> nodos =new ConcurrentHashMap<>();
@@ -63,29 +70,32 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
 //
 //    }
 
-    private void sendMessage(Comando comando) {
-//        if (comando.isPublic()) {
-            // Enviar a todos los nodos
-            for (SocketClient nodo : nodos.values()) {
-                try {
-                    nodo.send(comando.getComando());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-//        } else {
-//            // Enviar solo a un nodo específico
-//            SocketClient nodo = nodos.get(comando.getIp());
-//            if (nodo != null) {
-//                try {
-//                    nodo.send(comando.getComando());
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
+    public static void sendCommand(String ip, Comando comando) {
+        SocketClient client = nodos.get(ip);
+        if (client != null) {
+            client.send(comando);
+        }
     }
 
+
+    private void sendMessage(Comando comando) {
+        for (SocketClient nodo : nodos.values()) {
+            if (!nodo.isConnected()) {
+                log.info("Eliminando nodo porque no esta conectado: {}", nodo.getIp());
+
+                nodos.remove(nodo.getIp());
+                return;
+            }
+
+            try {
+                nodo.send(comando);
+                log.info("Comando [ {} ] Enviado a IP:{}", comando.getComando(), nodo.getIp());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
     @Override
     public void onNewNodo(SocketClient client) {
         synchronized (nodos) {
@@ -123,5 +133,15 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
     @Override
     public void onMessage(Comando comando) {
         // no implementar
+    }
+
+    public static void removeCliente(String ip) {
+        synchronized (nodos) {
+            nodos.remove(ip);
+            System.out.println("Eliminando nodo");
+        }
+    }
+    public static int getCantidadNodos(){
+        return nodos.size();
     }
 }

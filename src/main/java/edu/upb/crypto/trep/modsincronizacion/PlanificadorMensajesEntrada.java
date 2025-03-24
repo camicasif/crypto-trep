@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import edu.upb.crypto.trep.DataBase.Functions;
 import edu.upb.crypto.trep.DataBase.models.Candidato;
 import edu.upb.crypto.trep.DataBase.models.Votante;
+import edu.upb.crypto.trep.DataBase.models.Voto;
 import edu.upb.crypto.trep.bl.*;
 import edu.upb.crypto.trep.modsincronizacion.server.SocketClient;
 import edu.upb.crypto.trep.modsincronizacion.server.event.SocketEvent;
@@ -64,6 +65,24 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
                     procesarEliminarVotante((EliminarVotante) comando);
 
                     break;
+
+                case ComandoCodigo.SINCRONIZACION_BLOQUES:
+                    sincronizarBloques((SincronizacionBloques) comando);
+
+                    break;
+
+                case ComandoCodigo.VOTACION:
+                    procesarVotacion((Votacion) comando);
+
+                    break;
+                case ComandoCodigo.CONFIRMACION_VOTO:
+                    procesarConfirmacionVoto((ConfirmacionVoto) comando);
+
+                    break;
+                case ComandoCodigo.CONFIRMACION_INSERT_BD:
+                    procesarConfirmacionInsercionBD((ConfirmacionInsertBD) comando);
+
+                    break;
                 default:
                     System.out.println("Comando no identificado: " +comando.getCodigoComando());
                     break;
@@ -108,6 +127,35 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
         PlanificadorMensajesSalida.addMessage(comando);
     }
 
+    private void sincronizarBloques(SincronizacionBloques comando){
+
+
+    }
+
+    private void procesarVotacion(Votacion comando){
+
+        Voto voto = comando.getVoto();
+        boolean isValidVote = Functions.isVotoValido(voto.getCodigoVotante(),
+                voto.getCodigoCandidato());
+        if (isValidVote){
+            PlanificadorTransacciones.add(comando);
+        }
+        ConfirmacionVoto cv = new ConfirmacionVoto(comando.getVoto().getId(),isValidVote,comando.getIp());
+        PlanificadorMensajesSalida.sendCommand(comando.getIp(), cv);
+    }
+
+
+
+    private void procesarConfirmacionVoto(ConfirmacionVoto comando){
+        if (comando.isCorrect())
+            PlanificadorPresidente.confirmarVoto(comando);
+    }
+
+    private void procesarConfirmacionInsercionBD(ConfirmacionInsertBD comando){
+        PlanificadorTransacciones.commitVoto(comando);
+
+    }
+
 
     @Override
     public void onNewNodo(SocketClient client) {
@@ -122,6 +170,13 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
 
     @Override
     public void onMessage(Comando comando) {
+        synchronized (messages){
+            messages.add(comando);
+            messages.notify();
+        }
+    }
+
+    public static void onMessage2(Comando comando) {
         synchronized (messages){
             messages.add(comando);
             messages.notify();

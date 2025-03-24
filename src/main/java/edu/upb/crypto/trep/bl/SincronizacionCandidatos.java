@@ -16,7 +16,7 @@ public class SincronizacionCandidatos extends Comando{
     public SincronizacionCandidatos(List<Candidato> candidatos) {
         this.setCodigoComando(ComandoCodigo.SINCRONIZACION_CANDIDATOS);
         this.candidatoes = candidatos;
-        setPublic(false);
+        setPublic(true);
     }
 
     public SincronizacionCandidatos(String ip){
@@ -24,14 +24,14 @@ public class SincronizacionCandidatos extends Comando{
         this.setCodigoComando(ComandoCodigo.SINCRONIZACION_CANDIDATOS);
 
         setIp(ip);
-        setPublic(false);
+        setPublic(true);
         this.candidatoes = new ArrayList<>();
     }
 
 //TODO rethink logic
     @Override
     public void parsear(String comando) {
-        System.out.println(comando);
+        System.out.println(comando+ "Al parsear sincronizacion candidatos");
         String[] tokens = comando.split(Pattern.quote("|"));
         if(tokens.length == 2){
             setCodigoComando(tokens[0]);

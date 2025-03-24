@@ -8,35 +8,47 @@ import java.util.regex.Pattern;
 @Getter
 @Setter
 public class ConfirmacionVoto extends Comando{
-    private String codigoVotante;
+    private String idVoto;
+    private boolean isCorrect;
 
-
-    public ConfirmacionVoto(String codigoVotante, String ip) {
+    public ConfirmacionVoto(String idVoto, boolean isCorrect,String ip) {
         this.setIp(ip);
         this.setCodigoComando(ComandoCodigo.CONFIRMACION_VOTO);
-        this.codigoVotante = codigoVotante;
-        setPublic(true);
+        this.idVoto = idVoto;
+        this.isCorrect = isCorrect;
+        setPublic(false);
     }
     public ConfirmacionVoto(String ip){
         super();
         this.setCodigoComando(ComandoCodigo.CONFIRMACION_VOTO);
         setIp(ip);
+        setPublic(false);
     }
 
     @Override
     public void parsear(String comando) {
-        System.out.println(comando);
-        String[] tokens = comando.split(Pattern.quote("|"));
-        if(tokens.length == 2){
-            setCodigoComando(tokens[0]);
-            this.codigoVotante = tokens[1];
 
+        String[] primeraDivision = comando.split(Pattern.quote("|"), 2);
+
+        if (primeraDivision.length == 2) {
+            setCodigoComando(primeraDivision[0]);
+
+            String[] segundaDivision = primeraDivision[1].split(Pattern.quote(","), 2);
+
+            if (segundaDivision.length == 2) {
+                setIdVoto(segundaDivision[0]);
+                this.isCorrect = Boolean.parseBoolean(segundaDivision[1]);
+            } else {
+                throw new IllegalArgumentException("Formato incorrecto después de la coma: " + primeraDivision[1]);
+            }
+        } else {
+            throw new IllegalArgumentException("Formato incorrecto del comando: " + comando);
         }
     }
 
     @Override
     public String getComando() {
-        return getCodigoComando()+"|"+ getCodigoVotante()+ System.lineSeparator();
+        return getCodigoComando()+"|"+ getIdVoto()+","+isCorrect+ System.lineSeparator();
     }
 
 }

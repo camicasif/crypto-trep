@@ -22,6 +22,7 @@ public class Functions {
         createVotanteTable();
         createCandidatosTable();
         createInitialBloqueTable();
+        createVotoTable();
     }
 
 
@@ -37,6 +38,114 @@ public class Functions {
             logger.info("Created table: Votante");
         } catch (SQLException e) {
             logger.error("Error creating table Votante", e);
+        }
+    }
+
+    public static boolean isVotoValido(String codigoVotante, String codigoCandidato) {
+        // Verificar si el votante existe
+        if (!votanteExists(codigoVotante)) {
+            logger.error("El votante con código " + codigoVotante + " no existe.");
+            return false;
+        }
+
+        // Verificar si el candidato existe
+        if (!candidatoExists(codigoCandidato)) {
+            logger.error("El candidato con ID " + codigoCandidato + " no existe.");
+            return false;
+        }
+
+        // Si ambos existen, el voto es válido
+        logger.info("El voto es válido: votante=" + codigoVotante + ", candidato=" + codigoCandidato);
+        return true;
+    }
+
+    public static boolean insertVoto(String id, String codigoVotante, String codigoCandidato, long timestamp) {
+        // Verificar si el votante existe
+        if (!votanteExists(codigoVotante)) {
+            logger.error("El votante con código " + codigoVotante + " no existe.");
+            return false;
+        }
+
+        // Verificar si el candidato existe
+        if (!candidatoExists(codigoCandidato)) {
+            logger.error("El candidato con ID " + codigoCandidato + " no existe.");
+            return false;
+        }
+
+        // Si ambos existen, proceder con la inserción
+        String sql = "INSERT INTO Voto (id, codigo_votante, codigo_candidato, timestamp) VALUES (?, ?, ?, ?)";
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+
+            // Asignar los valores a los parámetros de la consulta
+            statement.setString(1, id);
+            statement.setString(2, codigoVotante);
+            statement.setString(3, codigoCandidato);
+            statement.setLong(4, timestamp);
+
+            // Ejecutar la inserción
+            int rowsInserted = statement.executeUpdate();
+
+            // Verificar si la inserción fue exitosa
+            if (rowsInserted > 0) {
+                logger.info("Se insertó un nuevo voto correctamente.");
+                return true;
+            } else {
+                logger.warn("No se pudo insertar el voto.");
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error("Error al insertar en la tabla Voto", e);
+            return false;
+        }
+    }
+
+    // Método para verificar si un votante existe
+    private static boolean votanteExists(String codigoVotante) {
+        String sql = "SELECT codigo FROM Votante WHERE codigo = ?";
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.setString(1, codigoVotante);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next(); // Retorna true si el votante existe
+            }
+        } catch (SQLException e) {
+            logger.error("Error verificando existencia del votante", e);
+            return false;
+        }
+    }
+
+    // Método para verificar si un candidato existe
+    private static boolean candidatoExists(String codigoCandidato) {
+        String sql = "SELECT id FROM Candidatos WHERE id = ?";
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.setString(1, codigoCandidato);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next(); // Retorna true si el candidato existe
+            }
+        } catch (SQLException e) {
+            logger.error("Error verificando existencia del candidato", e);
+            return false;
+        }
+    }
+
+    public static void createVotoTable() {
+        String sql = "CREATE TABLE IF NOT EXISTS Voto (" +
+                "id TEXT PRIMARY KEY, " +
+                "codigo_votante TEXT, " +
+                "codigo_candidato TEXT, " +
+                "timestamp BIGINT)";  // Usamos BIGINT para almacenar el timestamp
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+            statement.execute();
+            logger.info("Created table: Voto");  // Corregido el nombre de la tabla en el log
+        } catch (SQLException e) {
+            logger.error("Error creating table Voto", e);  // Corregido el nombre de la tabla en el log
         }
     }
 
