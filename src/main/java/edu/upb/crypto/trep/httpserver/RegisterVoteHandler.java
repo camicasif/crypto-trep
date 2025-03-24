@@ -68,7 +68,7 @@ public class RegisterVoteHandler implements HttpHandler {
             Voto voto = new Voto(UUID.randomUUID().toString(),
                     codigoVotante,
                     codigoCandidato);
-            Votacion comando = new Votacion(voto, "randomFirma");
+            Votacion comando = new Votacion(voto, " ");
             PlanificadorMensajesSalida.addMessage(comando);
             PlanificadorPresidente.add(comando);
 

@@ -114,7 +114,7 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
                 nodos.put(client.getIp(), client);
             }
         }
-        log.info("Nuevo nodo agregado:" + client.getIp());
+        log.info("Nuevo nodo agregado:" + client.getIp(), nodos.size());
 
         if (MyProperties.IS_NODO_PRINCIPAL) {
             List<String> listaIps = new ArrayList<>(nodos.keySet());
@@ -153,7 +153,7 @@ public class PlanificadorMensajesSalida extends Thread implements SocketEvent {
     public static void removeCliente(String ip) {
         synchronized (nodos) {
             nodos.remove(ip);
-            System.out.println("Eliminando nodo");
+            System.out.println("Eliminando nodo "+ ip);
         }
     }
     public static int getCantidadNodos(){

@@ -38,7 +38,7 @@ public class CryptoTrep {
         PlanificadorMensajesEntrada pe = new PlanificadorMensajesEntrada();
         pe.start();
 
-        if (MyProperties.IS_NODO_PRINCIPAL) {
+        if (!MyProperties.IS_NODO_PRINCIPAL) {
             Server server = new Server();
             server.start();
             server.addListener(ps);// Planificador de salida se suscribe a los eventos del server
@@ -58,6 +58,7 @@ public class CryptoTrep {
         System.out.println(":::::::::::::::: IP NODO PRINCIPAL: "+MyProperties.IP_NODO_PRINCIPAL+" :::::::::");
         if(!MyProperties.IS_NODO_PRINCIPAL){
             SocketClient socketClient = new SocketClient(new Socket(MyProperties.IP_NODO_PRINCIPAL, 1825));
+
             socketClient.start();
             ps.onNewNodo(socketClient);
             socketClient.addListerner(pe);

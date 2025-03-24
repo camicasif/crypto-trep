@@ -163,6 +163,7 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
     private void procesarComandoSincronizacionVotantes(SincronizacionVotantes comando) {
 
         for (Votante votante : comando.getVotantes()) {
+            System.out.println("Votante "+ votante.getCodigo().toString());
             Functions.insertVotante(votante.getCodigo(), votante.getLlavePrivada());
         }
         //

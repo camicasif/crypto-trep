@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import edu.upb.crypto.trep.DataBase.models.Candidato;
 import edu.upb.crypto.trep.DataBase.models.Votante;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import edu.upb.crypto.trep.Utils;
 
 import java.sql.Connection;
@@ -14,9 +14,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class Functions {
     private static final int MAX_ROWS_PER_BLOQUE = 5;
-    static Logger logger = Logger.getLogger(Functions.class);
 
     public static void initializer(){
         createVotanteTable();
@@ -35,40 +35,40 @@ public class Functions {
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.execute();
-            logger.info("Created table: Votante");
+            log.info("Created table: Votante");
         } catch (SQLException e) {
-            logger.error("Error creating table Votante", e);
+            log.error("Error creating table Votante", e);
         }
     }
 
     public static boolean isVotoValido(String codigoVotante, String codigoCandidato) {
         // Verificar si el votante existe
         if (!votanteExists(codigoVotante)) {
-            logger.error("El votante con código " + codigoVotante + " no existe.");
+            log.error("El votante con código " + codigoVotante + " no existe.");
             return false;
         }
 
         // Verificar si el candidato existe
         if (!candidatoExists(codigoCandidato)) {
-            logger.error("El candidato con ID " + codigoCandidato + " no existe.");
+            log.error("El candidato con ID " + codigoCandidato + " no existe.");
             return false;
         }
 
         // Si ambos existen, el voto es válido
-        logger.info("El voto es válido: votante=" + codigoVotante + ", candidato=" + codigoCandidato);
+        log.info("El voto es válido: votante=" + codigoVotante + ", candidato=" + codigoCandidato);
         return true;
     }
 
     public static boolean insertVoto(String id, String codigoVotante, String codigoCandidato, long timestamp) {
         // Verificar si el votante existe
         if (!votanteExists(codigoVotante)) {
-            logger.error("El votante con código " + codigoVotante + " no existe.");
+            log.error("El votante con código " + codigoVotante + " no existe.");
             return false;
         }
 
         // Verificar si el candidato existe
         if (!candidatoExists(codigoCandidato)) {
-            logger.error("El candidato con ID " + codigoCandidato + " no existe.");
+            log.error("El candidato con ID " + codigoCandidato + " no existe.");
             return false;
         }
 
@@ -89,14 +89,14 @@ public class Functions {
 
             // Verificar si la inserción fue exitosa
             if (rowsInserted > 0) {
-                logger.info("Se insertó un nuevo voto correctamente.");
+                log.info("Se insertó un nuevo voto correctamente.");
                 return true;
             } else {
-                logger.warn("No se pudo insertar el voto.");
+                log.warn("No se pudo insertar el voto.");
                 return false;
             }
         } catch (SQLException e) {
-            logger.error("Error al insertar en la tabla Voto", e);
+            log.error("Error al insertar en la tabla Voto", e);
             return false;
         }
     }
@@ -112,7 +112,7 @@ public class Functions {
                 return rs.next(); // Retorna true si el votante existe
             }
         } catch (SQLException e) {
-            logger.error("Error verificando existencia del votante", e);
+            log.error("Error verificando existencia del votante", e);
             return false;
         }
     }
@@ -128,7 +128,7 @@ public class Functions {
                 return rs.next(); // Retorna true si el candidato existe
             }
         } catch (SQLException e) {
-            logger.error("Error verificando existencia del candidato", e);
+            log.error("Error verificando existencia del candidato", e);
             return false;
         }
     }
@@ -143,27 +143,31 @@ public class Functions {
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.execute();
-            logger.info("Created table: Voto");  // Corregido el nombre de la tabla en el log
+            log.info("Created table: Voto");  // Corregido el nombre de la tabla en el log
         } catch (SQLException e) {
-            logger.error("Error creating table Voto", e);  // Corregido el nombre de la tabla en el log
+            log.error("Error creating table Voto", e);  // Corregido el nombre de la tabla en el log
         }
     }
 
     // Insert data into Votante table
     public static String insertVotante(String codigo, String llavePrivada) {
-        System.out.println("insertVotante");
-//        String llavePrivada = Utils.generateUniqueKey(); // Generate key
-        String sql = "INSERT INTO Votante (codigo, llavePrivada) VALUES (?, ?)";
+        log.info("Insertando/actualizando votante - Código: {}, Llave: {}", codigo, llavePrivada);
+
+        // Usamos INSERT OR REPLACE para sobrescribir si existe
+        String sql = "INSERT OR REPLACE INTO Votante (codigo, llave_privada) VALUES (?, ?)";
 
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
+
             statement.setString(1, codigo);
             statement.setString(2, llavePrivada);
-            statement.executeUpdate();
-            logger.info("Inserted data into Votante table");
-            return llavePrivada; // Return the key
+
+            int affectedRows = statement.executeUpdate();
+            log.info("Filas afectadas: {}", affectedRows);
+
+            return llavePrivada;
         } catch (SQLException e) {
-            logger.error("Error inserting data into Votante table", e);
+            log.error("Error al insertar/actualizar votante. Error SQL: {}", e.getSQLState(), e);
             return null;
         }
     }
@@ -177,14 +181,14 @@ public class Functions {
             statement.setString(1, codigo);
             int rowsDeleted = statement.executeUpdate();
             if (rowsDeleted > 0) {
-                logger.info("Votante eliminado correctamente: Código=" + codigo);
+                log.info("Votante eliminado correctamente: Código=" + codigo);
                 return true;
             } else {
-                logger.warn("No se encontró el votante con Código=" + codigo);
+                log.warn("No se encontró el votante con Código=" + codigo);
                 return false;
             }
         } catch (SQLException e) {
-            logger.error("Error eliminando votante", e);
+            log.error("Error eliminando votante", e);
             return false;
         }
     }
@@ -199,24 +203,29 @@ public class Functions {
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.execute();
-            logger.info("Created table: Candidatos");
+            log.info("Created table: Candidatos");
         } catch (SQLException e) {
-            logger.error("Error creating table Candidatos", e);
+            log.error("Error creating table Candidatos", e);
         }
     }
 
     public static void insertCandidato(String id, String nombre) {
-        System.out.println("insertCandidato");
-        String sql = "INSERT INTO Candidatos (id, nombre) VALUES (?, ?)";
+        log.info("Insertando/actualizando candidato - ID: {}, Nombre: {}", id, nombre);
+
+        // Versión con INSERT OR REPLACE (SQLite)
+        String sql = "INSERT OR REPLACE INTO Candidatos (id, nombre) VALUES (?, ?)";
 
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
+
             statement.setString(1, id);
             statement.setString(2, nombre);
-            statement.executeUpdate();
-            logger.info("Inserted data into Candidatos table");
+
+            int affectedRows = statement.executeUpdate();
+            log.info("Filas afectadas en Candidatos: {}", affectedRows);
+
         } catch (SQLException e) {
-            logger.error("Error inserting data into Candidatos table", e);
+            log.error("Error al insertar/actualizar candidato. Error SQL: {}", e.getSQLState(), e);
         }
     }
 
@@ -229,14 +238,14 @@ public class Functions {
             statement.setString(1, id);
             int rowsDeleted = statement.executeUpdate();
             if (rowsDeleted > 0) {
-                logger.info("Candidato eliminado correctamente: ID=" + id);
+                log.info("Candidato eliminado correctamente: ID=" + id);
                 return true;
             } else {
-                logger.warn("No se encontró el candidato con ID=" + id);
+                log.warn("No se encontró el candidato con ID=" + id);
                 return false;
             }
         } catch (SQLException e) {
-            logger.error("Error eliminando candidato", e);
+            log.error("Error eliminando candidato", e);
             return false;
         }
     }
@@ -255,9 +264,9 @@ public class Functions {
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.execute();
-            logger.info("Created table: " + nextBlock);
+            log.info("Created table: " + nextBlock);
         } catch (SQLException e) {
-            logger.error("Error creating table " + nextBlock, e);
+            log.error("Error creating table " + nextBlock, e);
         }
     }
 
@@ -265,7 +274,7 @@ public class Functions {
         String latestBlock = getLatestBlockTable();
 
         if (!isTableFull(latestBlock)) {
-            logger.info("Current " + latestBlock +" table is not full. No new table created.");
+            log.info("Current " + latestBlock +" table is not full. No new table created.");
             return;
         }
 
@@ -281,9 +290,9 @@ public class Functions {
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.execute();
-            logger.info("Created table: " + nextBlock);
+            log.info("Created table: " + nextBlock);
         } catch (SQLException e) {
-            logger.error("Error creating table " + nextBlock, e);
+            log.error("Error creating table " + nextBlock, e);
         }
     }
 
@@ -309,15 +318,15 @@ public class Functions {
             statement.setString(4, hash);
             statement.setString(5, refAnteriorBloque);
             statement.executeUpdate();
-            logger.info("Inserted data into " + tableName);
+            log.info("Inserted data into " + tableName);
         } catch (SQLException e) {
-            logger.error("Error inserting data into " + tableName, e);
+            log.error("Error inserting data into " + tableName, e);
         }
     }
 
     public static boolean deleteBloque(String tableName) {
         if (!tableName.matches("Bloque_\\d{4}")) {
-            logger.error("Nombre de tabla de bloque no válido: " + tableName);
+            log.error("Nombre de tabla de bloque no válido: " + tableName);
             return false;
         }
 
@@ -326,10 +335,10 @@ public class Functions {
         try (Connection con = DataBase.getInstance().getConnection();
              PreparedStatement statement = con.prepareStatement(sql)) {
             statement.executeUpdate();
-            logger.info("Bloque eliminado correctamente: " + tableName);
+            log.info("Bloque eliminado correctamente: " + tableName);
             return true;
         } catch (SQLException e) {
-            logger.error("Error eliminando bloque", e);
+            log.error("Error eliminando bloque", e);
             return false;
         }
     }
@@ -346,7 +355,7 @@ public class Functions {
                 return rowCount >= MAX_ROWS_PER_BLOQUE;
             }
         } catch (SQLException e) {
-            logger.error("Error checking table row count: ", e);
+            log.error("Error checking table row count: ", e);
         }
 
         return false;
@@ -368,7 +377,7 @@ public class Functions {
                 return rs.getString("hash");
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving previous block hash: ", e);
+            log.error("Error retrieving previous block hash: ", e);
         }
 
         return "";
@@ -382,7 +391,7 @@ public class Functions {
             }
             return String.format("Bloque_%04d", currentBlockNumber - 1);
         } catch (NumberFormatException e) {
-            logger.error("Invalid table name format: " + currentTableName, e);
+            log.error("Invalid table name format: " + currentTableName, e);
             return null;
         }
     }
@@ -398,7 +407,7 @@ public class Functions {
                 latestBlock = resultSet.getString("name");
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving latest block table", e);
+            log.error("Error retrieving latest block table", e);
         }
 
         return latestBlock;
@@ -425,7 +434,7 @@ public class Functions {
                         .append(rs.getString("ref_anterior_bloque"));
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving table data: ", e);
+            log.error("Error retrieving table data: ", e);
         }
 
         return concatenatedData.toString();
@@ -441,7 +450,7 @@ public class Functions {
                 return rs.getString("llave_privada");
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving llave_privada", e);
+            log.error("Error retrieving llave_privada", e);
         }
         return null;
     }
@@ -463,7 +472,7 @@ public class Functions {
                 votantes.add(votante);
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving Votantes", e);
+            log.error("Error retrieving Votantes", e);
         }
 
         return votantes;
@@ -485,7 +494,7 @@ public class Functions {
                 candidatos.add(candidato);
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving Candidatos", e);
+            log.error("Error retrieving Candidatos", e);
         }
 
         return candidatos;
@@ -524,7 +533,7 @@ public class Functions {
                 bloques.add(bloque);
             }
         } catch (SQLException e) {
-            logger.error("Error retrieving Bloques", e);
+            log.error("Error retrieving Bloques", e);
         }
 
         return bloques;
