@@ -221,13 +221,14 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
 
     }
 
-    private void procesarCantidadRegistros(Comando comando){
+    private void procesarCantidadRegistros(CantidadVotos comando){
 
+//        int cantidadVotos = Functions.getCanti
 
 
     }
 
-    private void procesarMostrarRegistros(Comando comando){
+    private void procesarMostrarRegistros(RespuestaCantidadVotos comando){
         log.info("Comando 13: ",comando.getComando());
     }
 
