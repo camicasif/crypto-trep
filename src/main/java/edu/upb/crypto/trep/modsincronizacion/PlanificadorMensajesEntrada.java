@@ -90,11 +90,11 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
                     break;
 
                 case ComandoCodigo.CANTIDAD_REGISTROS_VOTOS:
-                    procesarCantidadRegistros((ConfirmacionInsertBD) comando);
+                    procesarCantidadRegistros((CantidadVotos) comando);
                     break;
 
                 case ComandoCodigo.MOSTRAR_REGISTROS_VOTOS:
-                    procesarMostrarRegistros((ConfirmacionInsertBD) comando);
+                    procesarMostrarRegistros((RespuestaCantidadVotos) comando);
                     break;
 
                 default:
@@ -223,8 +223,8 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
 
     private void procesarCantidadRegistros(CantidadVotos comando){
 
-//        int cantidadVotos = Functions.getCanti
-
+        int cantidadVotos = Functions.getCantidadVotos();
+        PlanificadorMensajesSalida.addMessage(new RespuestaCantidadVotos(cantidadVotos));
 
     }
 

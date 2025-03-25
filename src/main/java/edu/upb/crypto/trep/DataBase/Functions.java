@@ -148,6 +148,29 @@ public class Functions {
             log.error("Error creating table Voto", e);  // Corregido el nombre de la tabla en el log
         }
     }
+    public static int getCantidadVotos() {
+        log.info("Obteniendo cantidad de votos para el candidato con ID");
+
+        String sql = "SELECT COUNT(*) FROM Votos";
+        int cantidadVotos = 0;
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    cantidadVotos = rs.getInt(1);
+                }
+            }
+
+            log.info("Cantidad de votos para el candidato {} ", cantidadVotos);
+
+        } catch (SQLException e) {
+            log.error("Error al obtener la cantidad de votos. Error SQL: {}", e.getSQLState(), e);
+        }
+
+        return cantidadVotos;
+    }
 
     // Insert data into Votante table
     public static String insertVotante(String codigo, String llavePrivada) {
