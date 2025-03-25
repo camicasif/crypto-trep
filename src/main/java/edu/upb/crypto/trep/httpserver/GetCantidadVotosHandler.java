@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpHandler;
 import edu.upb.crypto.trep.DataBase.Functions;
 import edu.upb.crypto.trep.DataBase.models.Candidato;
 import edu.upb.crypto.trep.DataBase.models.Voto;
+import edu.upb.crypto.trep.bl.CantidadVotos;
 import edu.upb.crypto.trep.modsincronizacion.PlanificadorMensajesSalida;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
