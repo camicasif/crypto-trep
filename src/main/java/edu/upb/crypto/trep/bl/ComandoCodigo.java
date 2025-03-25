@@ -14,6 +14,12 @@ public class ComandoCodigo {
     public static final String CONFIRMACION_VOTO = "0010";
     public static final String CONFIRMACION_INSERT_BD = "0011";
 
+    public static final String CANTIDAD_REGISTROS_VOTOS = "0012";
+
+    public static final String MOSTRAR_REGISTROS_VOTOS = "0013";
+
+
+
 
 
 }

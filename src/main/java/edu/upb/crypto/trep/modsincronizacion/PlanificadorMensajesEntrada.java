@@ -87,8 +87,16 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
                     break;
                 case ComandoCodigo.CONFIRMACION_INSERT_BD:
                     procesarConfirmacionInsercionBD((ConfirmacionInsertBD) comando);
-
                     break;
+
+                case ComandoCodigo.CANTIDAD_REGISTROS_VOTOS:
+                    procesarCantidadRegistros((ConfirmacionInsertBD) comando);
+                    break;
+
+                case ComandoCodigo.MOSTRAR_REGISTROS_VOTOS:
+                    procesarMostrarRegistros((ConfirmacionInsertBD) comando);
+                    break;
+
                 default:
                     System.out.println("Comando no identificado: " +comando.getCodigoComando());
                     break;
@@ -212,6 +220,18 @@ public class PlanificadorMensajesEntrada extends Thread implements SocketEvent {
         PlanificadorTransacciones.commitVoto(comando);
 
     }
+
+    private void procesarCantidadRegistros(Comando comando){
+
+
+
+    }
+
+    private void procesarMostrarRegistros(Comando comando){
+        log.info("Comando 13: ",comando.getComando());
+    }
+
+
 
 
     @Override

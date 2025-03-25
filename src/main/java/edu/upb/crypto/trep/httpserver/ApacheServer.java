@@ -41,6 +41,8 @@ public class ApacheServer {
             this.server.createContext("/api/v1/getAllBloques", new GetAllBloquesHandler());
             this.server.createContext("/api/v1/deleteCandidato", new EliminarCandidatoHandler());
             this.server.createContext("/api/v1/deleteVotante", new EliminarVotanteHandler());
+            this.server.createContext("/api/v1/cantidadVotos", new GetCantidadVotosHandler());
+
             this.server.setExecutor(Executors.newFixedThreadPool(2));
             this.server.start();
         
