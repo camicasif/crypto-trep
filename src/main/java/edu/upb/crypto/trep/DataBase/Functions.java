@@ -172,6 +172,32 @@ public class Functions {
         return cantidadVotos;
     }
 
+    public static int getCantidadVotos(String idCandidato) {
+        log.info("Obteniendo cantidad de votos para el candidato con ID: {}", idCandidato);
+
+        String sql = "SELECT COUNT(*) FROM Votos WHERE id_candidato = ?";
+        int cantidadVotos = 0;
+
+        try (Connection con = DataBase.getInstance().getConnection();
+             PreparedStatement statement = con.prepareStatement(sql)) {
+
+            statement.setString(1, idCandidato);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    cantidadVotos = rs.getInt(1);
+                }
+            }
+
+            log.info("Cantidad de votos para el candidato {}: {}", idCandidato, cantidadVotos);
+
+        } catch (SQLException e) {
+            log.error("Error al obtener la cantidad de votos. Error SQL: {}", e.getSQLState(), e);
+        }
+
+        return cantidadVotos;
+    }
+
+
     // Insert data into Votante table
     public static String insertVotante(String codigo, String llavePrivada) {
         log.info("Insertando/actualizando votante - Código: {}, Llave: {}", codigo, llavePrivada);
