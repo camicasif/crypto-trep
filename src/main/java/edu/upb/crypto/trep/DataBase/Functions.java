@@ -151,7 +151,7 @@ public class Functions {
     public static int getCantidadVotos() {
         log.info("Obteniendo cantidad de votos para el candidato con ID");
 
-        String sql = "SELECT COUNT(*) FROM Votos";
+        String sql = "SELECT COUNT(*) FROM Voto";
         int cantidadVotos = 0;
 
         try (Connection con = DataBase.getInstance().getConnection();

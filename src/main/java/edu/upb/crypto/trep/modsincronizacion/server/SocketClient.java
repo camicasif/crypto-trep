@@ -94,6 +94,14 @@ public class SocketClient extends Thread {
                         comando = new ConfirmacionInsertBD(this.ip);
                         comando.parsear(message);
                         break;
+                    case ComandoCodigo.CANTIDAD_REGISTRO_VOTOS:
+                        comando = new CantidadVotos(this.ip);
+                        comando.parsear(message);
+                        break;
+                    case ComandoCodigo.MOSTRAR_REGISTROS_VOTOS:
+                        comando = new RespuestaCantidadVotos(this.ip);
+                        comando.parsear(message);
+                        break;
                     default:
                         System.out.println("Comando no identificado: "+ message);
                         break;
