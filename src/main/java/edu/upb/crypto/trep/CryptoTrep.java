@@ -38,7 +38,7 @@ public class CryptoTrep {
         PlanificadorMensajesEntrada pe = new PlanificadorMensajesEntrada();
         pe.start();
 
-        if (!MyProperties.IS_NODO_PRINCIPAL) {
+        if (MyProperties.IS_NODO_PRINCIPAL) {
             Server server = new Server();
             server.start();
             server.addListener(ps);// Planificador de salida se suscribe a los eventos del server
